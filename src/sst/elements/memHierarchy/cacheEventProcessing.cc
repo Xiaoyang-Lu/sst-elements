@@ -42,9 +42,45 @@ using namespace SST::MemHierarchy;
 #define is_debug_event(ev) false
 #endif
 
+typedef std::map<uint64_t, bool> active_hit_map;
+active_hit_map Cache::active_hit_map_;
+
+typedef std::map<uint64_t, bool> active_miss_map;
+active_miss_map Cache::active_miss_map_;
+
 
 void Cache::profileEvent(MemEvent* event, Command cmd, bool replay, bool canStall) {
-    if (!replay) {
+
+
+    bool hit_helper = false;
+    bool miss_helper = false;
+
+    iter_hit = active_hit_map_.find(timestamp_);
+    iter_miss = active_miss_map_.find(timestamp_);
+
+    if(iter_hit == active_hit_map_.end() && iter_miss == active_miss_map_.end() && active_miss_map_.size() == 1 && active_hit_map_.size() == 1){
+        iter_hit = active_hit_map_.begin();
+        hit_helper = iter_hit->second;
+
+        iter_miss = active_miss_map_.begin();
+        miss_helper = iter_miss->second;
+
+   	active_hit_map_.clear();
+        active_miss_map_.clear();
+        if(hit_helper == true  && miss_helper == false) {
+            statActivePureHitCycle->addData(1);
+        }
+        if(hit_helper == true){
+            statActiveHitCycle->addData(1);
+        }
+        if(miss_helper == true){
+            statActiveMissCycle->addData(1);
+        }
+        if(miss_helper == true && hit_helper == false) {
+	   statActivePureMissCycle->addData(1);
+   	 }	 
+     }
+     if (!replay) {
         switch (cmd) {
             case Command::GetS:
                 statGetS_recv->addData(1);
@@ -105,9 +141,16 @@ void Cache::profileEvent(MemEvent* event, Command cmd, bool replay, bool canStal
                 if (cacheHit == 0) {
                     statCacheHits->addData(1);
                     statGetSHitOnArrival->addData(1);
+		    statCacheTotalHitsOnArrival->addData(1);//number of hits in real system
+                    hit_exist = true; //tag for calculate active cycles (Xiaoyang)
+                    statOverall_Accesses->addData(1);// number of overall (read + write) accesses (Xiaoyang)
+			
                 } else {
                     statCacheMisses->addData(1);
                     statGetSMissOnArrival->addData(1);
+                    statCacheTotalMissesOnArrival->addData(1);//number of misses in real system
+                    miss_exist = true; //tag for calculate active cycles (Xiaoyang)
+                    statOverall_Accesses->addData(1);// number of overall (read + write) accesses (Xiaoyang)
                     if (cacheHit == 1 || cacheHit == 2) {
                         missTypeList_.insert(std::pair<MemEvent*,int>(event, 0));
                     } else if (cacheHit == 3) {
@@ -134,9 +177,16 @@ void Cache::profileEvent(MemEvent* event, Command cmd, bool replay, bool canStal
                 if (cacheHit == 0) {
                     statCacheHits->addData(1);
                     statGetXHitOnArrival->addData(1);
+                    statCacheTotalHitsOnArrival->addData(1);//number of hits in real system
+                    hit_exist = true; //tag for calculate active cycles (Xiaoyang)
+                    statOverall_Accesses->addData(1);// nuddmber of overall (read + write) accesses (Xiaoyang)
                 } else {
                     statCacheMisses->addData(1);
                     statGetXMissOnArrival->addData(1);
+                    statCacheTotalMissesOnArrival->addData(1);//number of misses in real system
+                    miss_exist = true; //tag for calculate active cycles (Xiaoyang)
+                    statOverall_Accesses->addData(1);// nuddmber of overall (read + write) accesses (Xiaoyang)
+
                     if (cacheHit == 1) {
                         missTypeList_.insert(std::pair<MemEvent*,int>(event, 2));
                     } else if (cacheHit == 2) {
@@ -167,9 +217,15 @@ void Cache::profileEvent(MemEvent* event, Command cmd, bool replay, bool canStal
                 if (cacheHit == 0) {
                     statCacheHits->addData(1);
                     statGetSXHitOnArrival->addData(1);
+                    statCacheTotalHitsOnArrival->addData(1);//number of hits in real system
+                    hit_exist = true; //tag for calculate active cycles (Xiaoyang)
+                    statOverall_Accesses->addData(1);// number of overall (read + write) accesses (Xiaoyang)
                 } else {
                     statCacheMisses->addData(1);
                     statGetSXMissOnArrival->addData(1);
+                    statCacheTotalMissesOnArrival->addData(1);//number of misses in real system
+                    miss_exist = true; //tag for calculate active cycles (Xiaoyang)
+                    statOverall_Accesses->addData(1);// number of overall (read + write) accesses (Xiaoyang)
                     if (cacheHit == 1) {
                         missTypeList_.insert(std::pair<MemEvent*,int>(event, 5));
                     } else if (cacheHit == 2) { 
@@ -198,6 +254,9 @@ void Cache::profileEvent(MemEvent* event, Command cmd, bool replay, bool canStal
         default:
             break;
     }
+	//add key value in maps
+	Cache::active_hit_map_[timestamp_] = hit_exist;
+	Cache::active_miss_map_[timestamp_] = miss_exist;
 }
 
 
@@ -560,6 +619,10 @@ void Cache::processIncomingEvent(SST::Event* ev) {
 
 /* Clock handler */
 bool Cache::clockTick(Cycle_t time) {
+    //initiakize no hits or misses in this cycle(Xiaoyang)
+    hit_exist = false;
+    miss_exist = false;
+
     timestamp_++;
     bool queuesEmpty = coherenceMgr_->sendOutgoingCommands(getCurrentSimTimeNano());
         

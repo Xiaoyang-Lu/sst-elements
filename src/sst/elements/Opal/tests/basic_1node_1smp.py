@@ -6,7 +6,9 @@ sst.setProgramOption("timebase", "1ps")
 sst.setProgramOption("stopAtCycle", "0 ns")
 
 # Tell SST what statistics handling we want
-sst.setStatisticLoadLevel(4)
+sst.setStatisticLoadLevel(16)
+#sst.enableAllStatisticsForAllComponents()
+#sst.setStatisticOutput("sst.statOutputCSV")
 
 clock = "2GHz"
 
@@ -33,11 +35,10 @@ ariel.addParams({
     "corecount" : cores/2,
     "arielmode" : 0,
     "appargcount" : 0,
-    "max_insts" : 10000,
     "executable" : "./app/opal_test",
     "node" : 0,
 })
-
+#    "max_insts" : 10000,
 # Opal uses this memory manager to intercept memory translation requests, mallocs, mmaps, etc.
 memmgr = ariel.setSubComponent("memmgr", "Opal.MemoryManagerOpal")
 memmgr.addParams({
@@ -50,7 +51,7 @@ submemmgr.addParams({
     "pagesize0" : page_size * 1024,
 })
 
-ariel.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
+#ariel.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
 
 mmu = sst.Component("mmu", "Samba")
 mmu.addParams({
@@ -102,7 +103,7 @@ mmu.addParams({
 	"opal_latency": "30ps",
 	"emulate_faults": 1,
 })
-mmu.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
+#mmu.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
 
 
 opal= sst.Component("opal","Opal")
@@ -128,7 +129,7 @@ opal.addParams({
 	"node0.memory.mem_type" 	: 0,
 	"num_ports"			: cores,
 })
-opal.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
+#opal.enableAllStatistics({"type":"sst.AccumulatorStatistic"})
 
 
 l1_params = {
@@ -363,4 +364,5 @@ midnet = Network("Bridge",3,"50ps","50ps")
 bridge(internal_network, midnet)
 bridge(external_network, midnet)
 
-
+sst.enableAllStatisticsForAllComponents()
+sst.setStatisticOutput("sst.statOutputCSV")

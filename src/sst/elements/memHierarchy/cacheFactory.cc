@@ -683,6 +683,13 @@ void Cache::checkDeprecatedParams(Params &params) {
 }
 
 void Cache::registerStatistics() {
+    statOverall_Accesses            = registerStatistic<uint64_t>("Overall_Accesses");
+    statCacheTotalHitsOnArrival     = registerStatistic<uint64_t>("CacheTotalHits_Arrival");
+    statCacheTotalMissesOnArrival   = registerStatistic<uint64_t>("CacheTotalMisses_Arrival");
+    statActivePureHitCycle          = registerStatistic<uint64_t>("Active_Pure_Hit_Cycle");
+    statActivePureMissCycle         = registerStatistic<uint64_t>("Active_Pure_Miss_Cycle");
+    statActiveHitCycle              = registerStatistic<uint64_t>("Active_Hit_Cycle");
+    statActiveMissCycle             = registerStatistic<uint64_t>("Active_Miss_Cycle");
     statTotalEventsReceived         = registerStatistic<uint64_t>("TotalEventsReceived");
     statTotalEventsReplayed         = registerStatistic<uint64_t>("TotalEventsReplayed");
     statNoncacheableEventsReceived  = registerStatistic<uint64_t>("TotalNoncacheableEventsReceived");
@@ -715,3 +722,4 @@ void Cache::registerStatistics() {
     statMSHROccupancy               = registerStatistic<uint64_t>("MSHR_occupancy");
     statBankConflicts               = registerStatistic<uint64_t>("Bank_conflicts");
 }
+

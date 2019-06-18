@@ -1,0 +1,62 @@
+graph "sst_simulation" {
+	newrank = true;
+	node [shape=record];
+	subgraph cluster_0 {
+		label="Rank 0";
+		subgraph cluster_0_0 {
+			label="Thread 0";
+				0 [label="{cpu\nariel.ariel | < cache_link_0 > Port: cache_link_0 | < cache_link_1 > Port: cache_link_1 }"];
+				1 [label="{mmu\nSamba | < cpu_to_mmu0 > Port: cpu_to_mmu0 | < mmu_to_cache0 > Port: mmu_to_cache0 | < ptw_to_opal0 > Port: ptw_to_opal0 | < cpu_to_mmu1 > Port: cpu_to_mmu1 | < mmu_to_cache1 > Port: mmu_to_cache1 | < ptw_to_opal1 > Port: ptw_to_opal1 | < ptw_to_mem0 > Port: ptw_to_mem0 | < ptw_to_mem1 > Port: ptw_to_mem1 }"];
+				2 [label="{opal\nOpal | < requestLink0 > Port: requestLink0 | < requestLink1 > Port: requestLink1 | < requestLink2 > Port: requestLink2 | < requestLink3 > Port: requestLink3 }"];
+				3 [label="{rtr_internal_network\nmerlin.hr_router | < port0 > Port: port0 | < port1 > Port: port1 | < port2 > Port: port2 | < port3 > Port: port3 | < port4 > Port: port4 | < port5 > Port: port5 | < port6 > Port: port6 }"];
+				4 [label="{l1cache_0\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < low_network_0 > Port: low_network_0 }"];
+				5 [label="{l2cache_0\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < cache > Port: cache }"];
+				6 [label="{l1cache_1\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < low_network_0 > Port: low_network_0 }"];
+				7 [label="{l2cache_1\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < cache > Port: cache }"];
+				8 [label="{l1cache_2\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < low_network_0 > Port: low_network_0 }"];
+				9 [label="{l2cache_2\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < cache > Port: cache }"];
+				10 [label="{l1cache_3\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < low_network_0 > Port: low_network_0 }"];
+				11 [label="{l2cache_3\nmemHierarchy.Cache | < high_network_0 > Port: high_network_0 | < cache > Port: cache }"];
+				12 [label="{l3cache\nmemHierarchy.Cache | < directory > Port: directory }"];
+				13 [label="{local_memory\nmemHierarchy.MemController | < direct_link > Port: direct_link }"];
+				14 [label="{dc\nmemHierarchy.DirectoryController | < memory > Port: memory | < network > Port: network }"];
+				15 [label="{rtr_Ext_Mem_Net\nmerlin.hr_router | < port0 > Port: port0 | < port1 > Port: port1 }"];
+				16 [label="{ExternalNVMmemContr\nmemHierarchy.MemController | < cube_link > Port: cube_link | < direct_link > Port: direct_link }"];
+				17 [label="{ExtMemDc\nmemHierarchy.DirectoryController | < memory > Port: memory | < network > Port: network }"];
+				18 [label="{ExternalMem\nMessier | < bus > Port: bus }"];
+				19 [label="{rtr_Bridge\nmerlin.hr_router | < port0 > Port: port0 | < port1 > Port: port1 }"];
+				20 [label="{Bridge:internal_network-Bridge\nmerlin.Bridge | < network0 > Port: network0 | < network1 > Port: network1 }"];
+				21 [label="{Bridge:Ext_Mem_Net-Bridge\nmerlin.Bridge | < network0 > Port: network0 | < network1 > Port: network1 }"];
+		};
+	};
+
+	0:"cache_link_0" -- 1:"cpu_to_mmu0" [label="cpu_mmu_link_0\n300ps"]; 
+	281474976710656:"opal_link_0" -- 2:"requestLink0" [label="ariel_opal_0\n300ps"]; 
+	1:"mmu_to_cache0" -- 4:"high_network_0" [label="mmu_cache_link_0\n300ps"]; 
+	1:"ptw_to_opal0" -- 2:"requestLink1" [label="ptw_opal_0\n300ps"]; 
+	4:"low_network_0" -- 5:"high_network_0" [label="l2cache_0_link\n300ps"]; 
+	5:"cache" -- 3:"port0" [label="l2_ring_link_0\n300ps"]; 
+	0:"cache_link_1" -- 1:"cpu_to_mmu1" [label="cpu_mmu_link_1\n300ps"]; 
+	281474976710656:"opal_link_1" -- 2:"requestLink2" [label="ariel_opal_1\n300ps"]; 
+	1:"mmu_to_cache1" -- 6:"high_network_0" [label="mmu_cache_link_1\n300ps"]; 
+	1:"ptw_to_opal1" -- 2:"requestLink3" [label="ptw_opal_1\n300ps"]; 
+	6:"low_network_0" -- 7:"high_network_0" [label="l2cache_1_link\n300ps"]; 
+	7:"cache" -- 3:"port1" [label="l2_ring_link_1\n300ps"]; 
+	1:"ptw_to_mem0" -- 8:"high_network_0" [label="ptw_mem_link_2\n300ps"]; 
+	8:"low_network_0" -- 9:"high_network_0" [label="l2cache_2_link\n300ps"]; 
+	9:"cache" -- 3:"port2" [label="l2_ring_link_2\n300ps"]; 
+	1:"ptw_to_mem1" -- 10:"high_network_0" [label="ptw_mem_link_3\n300ps"]; 
+	10:"low_network_0" -- 11:"high_network_0" [label="l2cache_3_link\n300ps"]; 
+	11:"cache" -- 3:"port3" [label="l2_ring_link_3\n300ps"]; 
+	12:"directory" -- 3:"port4" [label="l3_link\n300ps"]; 
+	13:"direct_link" -- 14:"memory" [label="mem_link\n300ps"]; 
+	14:"network" -- 3:"port5" [label="dc_link\n300ps"]; 
+	18:"bus" -- 16:"cube_link" [label="External_mem_nvm_link\n50ps"]; 
+	17:"memory" -- 16:"direct_link" [label="External_mem_dc_link\n500ps"]; 
+	17:"network" -- 15:"port0" [label="External_mem_link\n500ps"]; 
+	20:"network0" -- 3:"port6" [label="B0-internal_network-Bridge\n500ps"]; 
+	20:"network1" -- 19:"port0" [label="B1-internal_network-Bridge\n500ps"]; 
+	21:"network0" -- 15:"port1" [label="B0-Ext_Mem_Net-Bridge\n500ps"]; 
+	21:"network1" -- 19:"port1" [label="B1-Ext_Mem_Net-Bridge\n500ps"]; 
+
+}

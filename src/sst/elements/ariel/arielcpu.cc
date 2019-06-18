@@ -37,6 +37,9 @@
 #define ARIEL_INNER_STRINGIZE(input) #input
 #define ARIEL_STRINGIZE(input) ARIEL_INNER_STRINGIZE(input)
 
+//#undef PINTOOL_EXECUTABLE
+//#define PINTOOL_EXECUTABLE "/home/cc/local/packages/pin-2.14-71313-gcc.4.4.7-linux/pin-2.14-71313-gcc.4.4.7-linux/pin.sh"
+
 using namespace SST::ArielComponent;
 
 ArielCPU::ArielCPU(ComponentId_t id, Params& params) :
@@ -202,9 +205,12 @@ ArielCPU::ArielCPU(ComponentId_t id, Params& params) :
     output->verbose(CALL_INFO, 1, 0, "Base pipe name: %s\n", shmem_region_name.c_str());
 
     appLauncher = params.find<std::string>("launcher", PINTOOL_EXECUTABLE);
+    output->verbose(CALL_INFO, 2, 0, "appLauncher: %s\n", appLauncher.c_str());
+//    appLauncher = "/home/cc/local/packages/pin-2.14-71313-gcc.4.4.7-linux/pin-2.14-71313-gcc.4.4.7-linux/pin";
 
     const uint32_t launch_param_count = (uint32_t) params.find<uint32_t>("launchparamcount", 0);
-    const uint32_t pin_arg_count = 29 + launch_param_count;
+//    const uint32_t pin_arg_count = 29 + launch_param_count;
+    const uint32_t pin_arg_count = 39 + launch_param_count; //(Xiaoyang)
 
     execute_args = (char**) malloc(sizeof(char*) * (pin_arg_count + app_argc));
 
@@ -221,6 +227,10 @@ ArielCPU::ArielCPU(ComponentId_t id, Params& params) :
     execute_args[arg++] = const_cast<char*>("15");
 #endif
     execute_args[arg++] = const_cast<char*>("-follow_execv");
+
+
+// add ifeellucky, to let you use older PIN on newer kernels (Xiaoyang)
+    execute_args[arg++] = const_cast<char*>("-ifeellucky");
 
     char* param_name_buffer = (char*) malloc(sizeof(char) * 512);
 
@@ -284,6 +294,7 @@ ArielCPU::ArielCPU(ComponentId_t id, Params& params) :
     execute_args[arg++] = const_cast<char*>("--");
     execute_args[arg++] = (char*) malloc(sizeof(char) * (executable.size() + 1));
     strcpy(execute_args[arg-1], executable.c_str());
+
 
     char* argv_buffer = (char*) malloc(sizeof(char) * 256);
     for(uint32_t aa = 0; aa < app_argc ; ++aa) {
@@ -437,6 +448,7 @@ int ArielCPU::forkPINChild(const char* app, char** args, std::map<std::string, s
     memset(full_execute_line, 0, sizeof(char) * 16384);
 
     while(NULL != args[next_arg_index]) {
+	output->verbose(CALL_INFO, 2, 0, "arg[%d]: %s\n", next_arg_index, args[next_arg_index]);
         int copy_char_index = 0;
 
         if(0 != next_line_index) {
@@ -451,7 +463,6 @@ int ArielCPU::forkPINChild(const char* app, char** args, std::map<std::string, s
     }
 
     full_execute_line[next_line_index] = '\0';
-
     output->verbose(CALL_INFO, 2, 0, "Executing PIN command: %s\n", full_execute_line);
     free(full_execute_line);
 

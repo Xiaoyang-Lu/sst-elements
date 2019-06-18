@@ -117,6 +117,17 @@ public:
             {"cache_data",      "For split networks, data network port to cache",                                   {"memHierarchy.MemRtrEvent"} })
 
     SST_ELI_DOCUMENT_STATISTICS(
+	   /* Cache overall accesses (Xiaoyang) */
+	   {"Overall_Accesses", "Number of overall accesses", "count", 1},
+	   /* Cache hits and misses count (Xiaoyang) */
+	   {"CacheTotalHits_Arrival", "Number of total cache hits", "count", 1},
+           {"CacheTotalMisses_Arrival", "Number of total cache misses", "count", 1},
+	   /* Active Cycles (Xiaoyang) */
+           {"Active_Pure_Hit_Cycle", "Number of active pure hit cycle", "count", 1},
+           {"Active_Pure_Miss_Cycle", "Number of active pure miss cycle", "count", 1},
+	   {"Active_Hit_Cycle", "Number of active hit cycle", "count", 1},
+           {"Active_Miss_Cycle", "Number of active miss cycle", "count", 1},
+
             /* Cache hits and misses */
             {"CacheHits",               "Total number of cache hits", "count", 1},
             {"CacheMisses",             "Total number of cache misses", "count", 1},
@@ -383,6 +394,10 @@ private:
     std::vector<bool>               bankStatus_;    // TODO change if we want multiported banks
     MemRegion                       region_; // Memory region handled by this cache
 
+    //These parameters are for calculate active cycles(Xiaoyang)//
+    bool		    hit_exist;//hit exist in this cycle
+    bool                    miss_exist;//miss exist in this cycle
+
     // These parameters are for the coherence controller and are detected during init
     bool                    isLL;
     bool                    lowerIsNoninclusive;
@@ -399,9 +414,37 @@ private:
     bool                    clockDownLink_; // Whether link actually needs clock() called or not
 
     /*
+       * helper map (timestamp_,hit_exist)
+       * helper map (timestamp_,miss_exist)
+       * For calculating Active Cycle (Xiaoyang)
+       */
+
+    typedef                 std::map<uint64_t, bool> active_hit_map;
+    static                  active_hit_map active_hit_map_;
+
+    typedef                 std::map<uint64_t, bool> active_miss_map;
+    static                  active_miss_map active_miss_map_;
+
+    map<uint64_t, bool>::iterator iter_hit;
+    map<uint64_t, bool>::iterator iter_miss;
+
+    /*
      * Statistics API stats
      */
-    // Cache hits
+    // Cache Accesses (Xiaoyang)
+    Statistic<uint64_t>* statOverall_Accesses;
+    
+    // Active cycle (Xiaoyang)
+    Statistic<uint64_t>* statActivePureHitCycle;
+    Statistic<uint64_t>* statActivePureMissCycle;
+    Statistic<uint64_t>* statActiveHitCycle;
+    Statistic<uint64_t>* statActiveMissCycle;
+
+    // Cache hits and misses count (Xiaoyang)
+    Statistic<uint64_t>* statCacheTotalHitsOnArrival;//number of cache hits in real system
+    Statistic<uint64_t>* statCacheTotalMissesOnArrival;//number of cache misses in real system
+   
+     // Cache hits
     Statistic<uint64_t>* statCacheHits;
     Statistic<uint64_t>* statGetSHitOnArrival;
     Statistic<uint64_t>* statGetXHitOnArrival;
