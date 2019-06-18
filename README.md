@@ -1,5 +1,7 @@
 ![SST](http://sst-simulator.org/img/sst-logo-small.png)
 
+C-AMAT parameters are supported in this version.
+
 # Structural Simulation Toolkit (SST)
 
 #### Copyright (c) 2009-2019, National Technology and Engineering Solutions of Sandia, LLC (NTESS)
